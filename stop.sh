@@ -1,5 +1,5 @@
-docker stop worker planner worker1 worker2
-docker rm worker planner worker1 worker2
+docker stop worker planner worker1 
+docker rm worker planner worker1 
 
 
-docker network rm dockerwork
+docker network rm dockerwork 
