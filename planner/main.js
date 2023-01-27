@@ -13,9 +13,8 @@ const generateTasks = (i) =>
   new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
 let workers = [
-   { url: 'http://worker:8080', id: '0', task: process.env.MULT },
-   { url: 'http://worker1:8090', id: '1',task: process.env.ADD,},
-   { url: 'http://worker2:8095', id: '2', task: process.env.MULT }
+  { url: 'http://worker:8080', id: '0' },
+  { url: 'http://worker1:8090', id: '1' },
 ]
 
 const app = express()
@@ -44,12 +43,6 @@ const wait = (mili) =>
   new Promise((resolve, reject) => setTimeout(resolve, mili))
 
 const sendTask = async (worker, task) => {
-  const worker = workers.find((w) => w.tast ===task.type)
-  if(!worker) {
-    console.log(`No worker for task type ${task.type}`)
-    return
-  }
-  
   console.log(`=> ${worker.url}/${task.type}`, task)
   workers = workers.filter((w) => w.id !== worker.id)
   tasks = tasks.filter((t) => t !== task)
