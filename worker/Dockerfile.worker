@@ -1,0 +1,14 @@
+FROM node:14-alpine
+
+WORKDIR /app
+
+ENV TASKS=4
+
+RUN yarn install
+
+COPY . .
+
+EXPOSE 8080
+
+
+CMD ["node", "./worker/main"]
