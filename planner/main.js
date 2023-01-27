@@ -13,9 +13,13 @@ const generateTasks = (i) =>
   new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
 let workers = [
-  { url: 'http://worker:8080', id: '0' },
-  { url: 'http://worker1:8090', id: '1' },
+  { url: 'http://worker:8080', id: '0', type: 'mult'},
+  { url: 'http://worker1:8090', id: '1', type:'add' }
+ // { url: 'http://worker1:8095', id: '2', type:'mult' }
 ]
+
+let workersMult = workers.filter((w) => w.type == 'mult');
+let workersAdd = workers.filter((w) => w.type == 'add');
 
 const app = express()
 app.use(express.json())
@@ -44,7 +48,19 @@ const wait = (mili) =>
 
 const sendTask = async (worker, task) => {
   console.log(`=> ${worker.url}/${task.type}`, task)
-  workers = workers.filter((w) => w.id !== worker.id)
+
+  if(worker.type == 'mult'){
+    workersMult = workersMult.filter((w) => w.id !== worker.id)
+
+  }
+
+  if(worker.type == 'add'){
+    workersAdd = workersAdd.filter((w) => w.id !== worker.id)
+
+  }
+
+
+
   tasks = tasks.filter((t) => t !== task)
   const request = fetch(`${worker.url}/${task.type}`, {
     method: 'POST',
@@ -55,7 +71,17 @@ const sendTask = async (worker, task) => {
     body: JSON.stringify(task.args),
   })
     .then((res) => {
-      workers = [...workers, worker]
+
+      if(worker.type == 'mult'){
+        workersMult = [...workersMult, worker]
+      }
+
+      if(worker.type == 'add'){
+        workersAdd = [...workersAdd, worker]
+      }
+
+
+
       return res.json()
     })
     .then((res) => {
@@ -76,8 +102,26 @@ const main = async () => {
   console.log(tasks)
   while (taskToDo > 0) {
     await wait(100)
-    if (workers.length === 0 || tasks.length === 0) continue
-    sendTask(workers[0], tasks[0])
+    if (workersMult.length === 0 || workersAdd.length === 0 || tasks.length === 0) continue
+
+//On appelle sendTask avec le bon type de worker
+    if(tasks[0].type == 'mult'){
+      if(workersMult.length !== 0 ){
+        sendTask(workersMult[0],tasks[0])
+      }
+      continue
+    }
+
+    if(tasks[0].type == 'add'){
+      if(workersAdd.length !== 0 ){
+        sendTask(workersAdd[0],tasks[0])
+      }
+      continue
+    }
+
+continue
+
+
   }
   console.log('end of tasks')
   server.close()
